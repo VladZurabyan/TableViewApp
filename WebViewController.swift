@@ -1,0 +1,62 @@
+//
+//  WebViewController.swift
+//  Table
+//
+//  Created by ADMIN on 26/03/2020.
+//  Copyright © 2020 ADMIN. All rights reserved.
+//
+
+import UIKit
+import WebKit
+
+class WebViewController: UIViewController,WKNavigationDelegate {
+    
+    var webView: WKWebView!
+    var progressView: UIProgressView!
+    var url: URL!
+    
+    deinit {
+        webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress))
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        webView = WKWebView()
+        webView.navigationDelegate = self
+        view = webView
+        
+        
+        let request = URLRequest(url: url)
+        webView.load(request)
+        webView.allowsBackForwardNavigationGestures = true
+        
+        progressView = UIProgressView(progressViewStyle: .default)
+        progressView.sizeToFit()
+        
+        let progressButton = UIBarButtonItem(customView: progressView)
+        let flexibleSpacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let refreshButton = UIBarButtonItem(barButtonSystemItem: .refresh, target: webView, action: #selector(webView.reload))
+        let backButton = UIBarButtonItem(barButtonSystemItem: .rewind, target: webView, action: #selector(webView.goBack))
+        
+        toolbarItems = [progressButton, flexibleSpacer, refreshButton, backButton]
+        navigationController?.isToolbarHidden = false
+        
+        webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
+    }
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == "estimatedProgress" {
+            progressView.progress = Float(webView.estimatedProgress)
+        }
+    }
+    
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        title = webView.title
+    }
+    
+   
+    
+
+    
+}
